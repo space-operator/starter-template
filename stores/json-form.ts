@@ -7,7 +7,7 @@ interface JsonFormState {
 }
 
 export const useJsonForm = create<JsonFormState>((set, get) => ({
-  json: { amount: { F: '0.001' }, sender: { S: '' } },
+  json: { amount: { F: '0.001' }, sender: { S: 'WALLET' } },
   setJson: (json) => set({ json }),
   getJson: () => get().json,
 }));

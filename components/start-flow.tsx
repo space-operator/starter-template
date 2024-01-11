@@ -9,6 +9,7 @@ import { FlowPrep, useFlowPrep } from '@/stores/flow-prep';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useJsonForm } from '@/stores/json-form';
 import { useFlowRun } from '@/stores/flow-run';
+import { toast } from 'sonner';
 
 export const StartFlow = () => {
   const { flow } = useFlowStore((state) => state);
@@ -20,14 +21,29 @@ export const StartFlow = () => {
   async function handleStartFlow() {
     if (!wallet.publicKey || flow === null || flow.id === null) return;
 
+    // replace input json word 'WALLET' with wallet public key
+    const walletPk = wallet.publicKey.toBase58();
+    const jsonStr = JSON.stringify(json).replace(/WALLET/g, walletPk);
+    const updatedJson = JSON.parse(jsonStr);
+
     const prep: FlowPrep = {
       flowId: flow.id,
       // network: network,
-      inputs: json,
-      authorization: wallet.publicKey!.toBase58(),
+      inputs: updatedJson,
+      authorization: wallet.publicKey.toBase58(),
     };
-    console.log(prep);
+
     setFlowPrep(prep);
+
+    toast('Starting flow with following inputs:', {
+      description: (
+        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
+          <code className='text-white'>
+            {JSON.stringify(updatedJson, null, 2)}
+          </code>
+        </pre>
+      ),
+    });
 
     await fetch(`${baseUrl}/api/start-flow`, {
       body: JSON.stringify(prep),
@@ -42,9 +58,14 @@ export const StartFlow = () => {
     flow && (
       <div className='border'>
         <CodeEditor />
-        <SelectNetwork />
-        <div className='flex justify-end'>
-          {flow.id && <Button onClick={handleStartFlow}>Start</Button>}
+
+        <div className='m-4 flex justify-end gap-4'>
+          <SelectNetwork />
+          {flow.id && wallet.publicKey ? (
+            <Button onClick={handleStartFlow}>Start Flow</Button>
+          ) : (
+            <Button disabled>Please connect wallet</Button>
+          )}
         </div>
       </div>
     )

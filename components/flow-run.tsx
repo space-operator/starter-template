@@ -16,9 +16,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useFlowStore } from '@/stores/loaded-flow';
+import { formatDateTime } from '@/lib/utils';
 
 export const FlowRun = () => {
   const { flowResponse } = useFlowRun((state) => state);
+  const { flow } = useFlowStore((state) => state);
 
   const ws = useRef<WebSocket | null>(null);
   const [socketData, setSocketData] = useState<
@@ -37,6 +40,17 @@ export const FlowRun = () => {
     signMessage,
     publicKey: walletPublicKey,
   } = useWallet();
+
+  // map flow nodes into nodes
+  useEffect(() => {
+    if (!flow) return;
+
+    const result = flow.nodes.map((node) => ({
+      id: node.id,
+      name: node.data.display_name,
+    }));
+    setNodes(result);
+  }, [flow]);
 
   useEffect(() => {
     if (!flowResponse) return;
@@ -157,17 +171,27 @@ export const FlowRun = () => {
     }
   };
 
+  // Add a div to bottom to create scroll to bottom effect
+  const scrollToDiv = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollToDiv.current) {
+      scrollToDiv.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [socketData]);
+
   return (
     <>
       {flowResponse && (
-        <div className='border max-w-[60%]'>
-          <Table className='dark:text-gray-200 h-96 w-[1000px] overflow-y-scroll'>
+        <div className='border-2 max-w-[80%] h-96 overflow-scroll'>
+          <Table className='dark:text-gray-200'>
             <TableHeader>
-              <TableRow className='text-left px-3 sticky top-0 dark:bg-gray-700'>
+              <TableRow>
+                <TableHead>Time</TableHead>
                 <TableHead>Event</TableHead>
-                <TableHead>Node ID</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Data</TableHead>
+                <TableHead>ID</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -175,15 +199,23 @@ export const FlowRun = () => {
                 socketData.map((data, index) => (
                   <TableRow key={index}>
                     <TableCell className='truncate pr-2.5'>
-                      {data?.event}
+                      {formatDateTime(data?.time)}
                     </TableCell>
                     <TableCell className='truncate pr-2.5'>
-                      {data?.nodeId}
+                      {data?.event}
                     </TableCell>
                     <TableCell className='pr-2.5 py-1'>
                       {data?.nodeName}
                     </TableCell>
-                    <TableCell>{JSON.stringify(data?.objectData)}</TableCell>
+                    <TableCell>
+                      {typeof data?.objectData === 'object'
+                        ? JSON.stringify(data?.objectData, null, 2)
+                        : data?.objectData}
+                    </TableCell>
+                    <TableCell className='truncate pr-2.5'>
+                      {data?.id}
+                    </TableCell>
+                    <div ref={scrollToDiv} className=''></div>
                   </TableRow>
                 ))}
             </TableBody>

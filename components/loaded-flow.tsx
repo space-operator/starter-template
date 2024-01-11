@@ -33,7 +33,6 @@ export const LoadedFlow = () => {
   const { flow } = useFlowStore((state) => state);
 
   const [flowInputs, setFlowInputs] = useState<FlowInput[]>([]);
-  console.log(flow);
 
   useEffect(() => {
     if (!flow) return;

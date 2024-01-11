@@ -1,9 +1,10 @@
 import { convertValue } from '../types/value';
 
 export interface SocketEventData {
-  nodeId: string;
-  nodeName: string;
-  event: string;
+  time: Date;
+  id?: string;
+  nodeName?: string;
+  event?: string;
   objectData: any;
 }
 
@@ -14,25 +15,47 @@ export function convertSocketData(
   if (!rawData) return null;
 
   const content = rawData.event?.content;
+  const time = rawData.event?.time;
   const data =
+    content.FlowStart ??
     content.NodeStart ??
     content.NodeFinish ??
     content.NodeOutput ??
+    content.FlowLog ??
     content.FlowError;
 
   if (!data) return null;
 
+  if (content.FlowStart) {
+    return {
+      time: new Date(time),
+      id: undefined,
+      nodeName: undefined,
+      event: 'Flow Start',
+      objectData: undefined,
+    };
+  }
+
+  if (content.FlowLog) {
+    return {
+      time: new Date(time),
+      id: undefined,
+      nodeName: content.FlowLog.level,
+      event: 'Flow Log',
+      objectData: content.FlowLog.module + ' - ' + content.FlowLog.content,
+    };
+  }
+
   const nodeId = data.node_id;
-  // const nodeName = nodes.find((node) => node.id === nodeId)?.name;
-  // if (!nodeName) return null;
-  const nodeName = data.node_id;
+  const nodeName = nodes.find((node) => node.id === nodeId)?.name;
 
   if (data.input) {
     const objectData = convertValue(data.input);
     return {
-      nodeId,
+      time: new Date(time),
+      id: nodeId,
       nodeName,
-      event: 'Start',
+      event: 'Node Start',
       objectData,
     };
   }
@@ -40,9 +63,10 @@ export function convertSocketData(
   if (data.output) {
     const objectData = convertValue(data.output);
     return {
-      nodeId,
+      time: new Date(time),
+      id: nodeId,
       nodeName,
-      event: 'Output',
+      event: 'Node Output',
       objectData,
     };
   }
@@ -50,22 +74,24 @@ export function convertSocketData(
   if (data.er) {
     const objectData = convertValue(data.output);
     return {
-      nodeId,
+      time: new Date(time),
+      id: nodeId,
       nodeName,
-      event: 'Output',
+      event: 'Error',
       objectData,
     };
   }
 
   if (content.NodeFinish) {
-    const nodeId = content.NodeFinish.node_id;
-    const nodeName = nodes.find((node) => node.id === nodeId)?.name;
-    if (!nodeName) return null;
+    // const nodeId = content.NodeFinish.node_id;
+    // const nodeName = nodes.find((node) => node.id === nodeId)?.name;
+    // if (!nodeName) return null;
     return {
-      nodeId,
+      time: new Date(time),
+      id: nodeId,
       nodeName,
-      event: 'Finish',
-      objectData: {},
+      event: 'Node Finish',
+      objectData: undefined,
     };
   }
 

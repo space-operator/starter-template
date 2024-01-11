@@ -36,6 +36,9 @@ export function CodeEditor() {
           value={JSON.stringify(state.json, null, 2)}
         />
       </div>
+      <div className='flex justify-center text-sm italic'>
+        use keyword WALLET to replace with connected pubkey
+      </div>
     </>
   );
 }
