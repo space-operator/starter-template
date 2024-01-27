@@ -6,12 +6,14 @@ type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+import { Edge } from 'reactflow';
+
 export type Flow = {
   created_at: string;
   current_network: Json;
   custom_networks: Json[];
   description: string;
-  edges: Json[] | null;
+  edges: Edge[] | null;
   environment: Json | null;
   guide: Json | null;
   id: number;

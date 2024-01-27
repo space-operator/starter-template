@@ -207,7 +207,13 @@ export const FlowRun = () => {
                     <TableCell className='pr-2.5 py-1'>
                       {data?.nodeName}
                     </TableCell>
-                    <TableCell>
+                    <TableCell
+                      style={{
+                        maxWidth: 500,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
                       {typeof data?.objectData === 'object'
                         ? JSON.stringify(data?.objectData, null, 2)
                         : data?.objectData}

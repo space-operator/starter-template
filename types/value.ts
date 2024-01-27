@@ -1,98 +1,103 @@
 export interface String {
-    S: string;
+  S: string;
 }
 export interface Decimal {
-    D: string;
+  D: string;
 }
 export interface I64 {
-    I: string;
+  I: string;
 }
 export interface U64 {
-    U: string;
+  U: string;
 }
 export interface I128 {
-    I1: string;
+  I1: string;
 }
 export interface U128 {
-    U1: string;
+  U1: string;
 }
 export interface F64 {
-    F: string;
+  F: string;
 }
 export interface Bool {
-    B: boolean;
+  B: boolean;
 }
 export interface Null {
-    N: 0;
+  N: 0;
 }
 export interface Bytes32 {
-    B3: string;
+  B3: string;
 }
 export interface Bytes64 {
-    B6: string;
+  B6: string;
 }
 export interface Bytes {
-    BY: string;
+  BY: string;
 }
 export interface Array {
-    A: Value[];
+  A: Value[];
 }
 export interface Map {
-    M: Record<string, Value>;
+  M: Record<string, Value>;
 }
 export interface Value {
-    S?: string;
-    D?: string;
-    I?: string;
-    U?: string;
-    I1?: string;
-    U1?: string;
-    F?: string;
-    B?: boolean;
-    N?: 0;
-    B3?: string;
-    B6?: string;
-    BY?: string;
-    A?: Value[];
-    M?: Record<string, Value>;
+  S?: string;
+  D?: string;
+  I?: string;
+  U?: string;
+  I1?: string;
+  U1?: string;
+  F?: string;
+  B?: boolean;
+  N?: 0;
+  B3?: string;
+  B6?: string;
+  BY?: string;
+  A?: Value[];
+  M?: Record<string, Value>;
 }
 
-export function convertValue(v: Value | null): string | number | boolean | Object | null {
-    if (v == null) return null;
+export function convertValue(
+  v: Value | null
+): string | number | boolean | Object | null {
+  if (v == null) return null;
 
-    const v0 = v.S ?? v.BY;
-    if (v0 != null) return v0;
+  const v0 = v.S ?? v.BY;
+  if (v0 != null) return v0;
 
-    const v1 = v.D ?? v.I ?? v.U ?? v.I1 ?? v.U1 ?? v.F;
-    if (v1 != null) return Number(v1);
+  const v1 = v.D ?? v.I ?? v.U ?? v.I1 ?? v.U1 ?? v.F;
+  if (v1 != null) return Number(v1);
 
-    const v2 = v.B3 ?? v.B6;
-    if (v2 != null) return v2;
+  const v2 = v.B3 ?? v.B6;
+  if (v2 != null) return v2;
 
-    if (v.B != null) return v.B;
-    if (v.N) return null;
-    if (v.A) return v.A.map(convertValue);
-    if (v.M) return Object.fromEntries(Object.entries(v.M).map(([k, v]) => [k, convertValue(v)]));
-    return null;
+  if (v.B != null) return v.B;
+  if (v.N) return null;
+  if (v.A) return v.A.map(convertValue);
+  if (v.M)
+    return Object.fromEntries(
+      Object.entries(v.M).map(([k, v]) => [k, convertValue(v)])
+    );
+  return null;
 }
 
 export function valueToText(v: Value | null): string {
-    if (v == null) return 'null';
+  if (v == null) return 'null';
 
-    const v0 = v.S ?? v.BY;
-    if (v0 != null) return v0;
+  const v0 = v.S ?? v.BY;
+  if (v0 != null) return v0;
 
-    const v1 = v.D ?? v.I ?? v.U ?? v.I1 ?? v.U1 ?? v.F;
-    if (v1 != null) return v1;
+  const v1 = v.D ?? v.I ?? v.U ?? v.I1 ?? v.U1 ?? v.F;
+  if (v1 != null) return v1;
 
-    const v2 = v.B3 ?? v.B6;
-    if (v2 != null) return v2;
+  const v2 = v.B3 ?? v.B6;
+  if (v2 != null) return v2;
 
-    if (v.B != null) return v.B.toString();
-    if (v.N) return 'null';
-    if (v.A) return JSON.stringify(convertValue(v));
-    if (v.M) return JSON.stringify(convertValue(v));
-    return "";
+  if (v.B != null) return v.B.toString();
+  if (v.N) return 'null';
+  if (v.A) return JSON.stringify(convertValue(v));
+  if (v.M) return JSON.stringify(convertValue(v));
+  return '';
 }
 
 /**
@@ -102,7 +107,45 @@ export function valueToText(v: Value | null): string {
  * @returns
  */
 export function valuePreview(v: Value | null, maxLength: number = 256): string {
-    const text = valueToText(v);
-    if (text?.length > maxLength) return text.slice(0, maxLength) + '...';
-    else return text;
+  const text = valueToText(v);
+  if (text?.length > maxLength) return text.slice(0, maxLength) + '...';
+  else return text;
+}
+
+export function createValue(type: string): Value {
+  switch (type) {
+    case 'keypair':
+    case 'string':
+      return { S: '' };
+    case 'decimal':
+      return { D: '' };
+    case 'i64':
+      return { I: '' };
+    case 'u64':
+      return { U: '' };
+    case 'i128':
+      return { I1: '' };
+    case 'u128':
+      return { U1: '' };
+    case 'f64':
+      return { F: '' };
+    case 'bool':
+      return { B: false };
+    case 'null':
+      return { N: 0 };
+    case 'b32':
+      return { B3: '' };
+    case 'b64':
+      return { B6: '' };
+    case 'bytes':
+      return { BY: '' };
+    case 'array':
+      return { A: [] };
+    case 'json':
+    case 'map':
+      return { M: {} };
+    default:
+      console.error(`Unsupported type: ${type}`);
+      return { S: 'unknown type' };
+  }
 }
