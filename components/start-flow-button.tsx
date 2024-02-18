@@ -27,8 +27,9 @@ export const StartFlowButton: FC<StartFlowButtonProps> = ({
   const { flow } = useFlowStore((state) => state);
 
   const [nodes, setNodes] = useState<{ id: string; name: string }[]>([]);
-  
+
   // map flow nodes into nodes
+  // only required for the socket data mapping
   useEffect(() => {
     if (!flow) return;
 
@@ -44,19 +45,24 @@ export const StartFlowButton: FC<StartFlowButtonProps> = ({
       wsClient.subscribeFlowRunEvents(
         async (ev) => {
           setLogs((logs) => [...logs, ev]);
+          // convert socket data for table display
           if (ev) {
             const convertedSocketData = convertSocketData(ev, nodes);
             appendSocketData([convertedSocketData]);
           }
+          // handle signature request
           if (ev.event === 'SignatureRequest') {
             const tx = ev.data.buildTransaction();
             const pk = new PublicKey(ev.data.pubkey);
 
             // sign and check if the wallet has changed the transaction
             const signedTx = await signTransaction(tx);
+            console.log('signed', signedTx);
+
             const signature = signedTx.signatures.find((ele) =>
               ele.publicKey.equals(pk)
             ).signature;
+            
             const before = tx.serializeMessage();
             const after = signedTx.serializeMessage();
             if (!before.equals(after)) {
