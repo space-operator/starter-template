@@ -12,7 +12,7 @@ import {
 
 export function SelectNetwork() {
   return (
-    <Select>
+    <Select disabled>
       <SelectTrigger className='w-[180px]'>
         <SelectValue placeholder='Select network' />
       </SelectTrigger>
