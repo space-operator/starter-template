@@ -25,7 +25,7 @@ export const StartFlowButton: FC<StartFlowButtonProps> = ({
   const { publicKey, signTransaction } = useWallet();
   const [logs, setLogs] = useState([]);
   const { setFlowResponse } = useFlowRun((state) => state);
-  const { appendSocketData } = useSocketDataStore();
+  const { appendSocketData, clearSocketData } = useSocketDataStore();
   const { flow } = useFlowStore((state) => state);
 
   const [nodes, setNodes] = useState<{ id: string; name: string }[]>([]);
@@ -111,6 +111,7 @@ export const StartFlowButton: FC<StartFlowButtonProps> = ({
 
   const startFlow = useCallback(async () => {
     setLogs([]);
+    clearSocketData();
     if (!publicKey) return;
     const body = await restClient.startFlowUnverified(flowId, publicKey, {
       inputs: inputBody,
