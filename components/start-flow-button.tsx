@@ -113,6 +113,22 @@ export const StartFlowButton: FC<StartFlowButtonProps> = ({
     setLogs([]);
     clearSocketData();
     if (!publicKey) return;
+
+    // const resp = await fetch(
+    //   `http://localhost:8080/flow/start_unverified/${flowId}`,
+    //   {
+    //     method: 'POST',
+    //     headers: {
+    //       authorization: publicKey.toBase58(),
+    //       'content-type': 'application/json',
+    //       'Access-Control-Allow-Origin': '*',
+    //     },
+    //     body: JSON.stringify({ inputs: inputBody }),
+    //     mode: 'no-cors',
+    //   }
+    // );
+    // const body = await resp.json();
+
     const body = await restClient.startFlowUnverified(flowId, publicKey, {
       inputs: inputBody,
     });

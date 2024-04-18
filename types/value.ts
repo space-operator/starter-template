@@ -115,6 +115,7 @@ export function valuePreview(v: Value | null, maxLength: number = 256): string {
 export function createValue(type: string): Value {
   switch (type) {
     case 'keypair':
+    case 'pubkey':
     case 'string':
       return { S: '' };
     case 'decimal':

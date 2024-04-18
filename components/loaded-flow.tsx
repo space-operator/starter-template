@@ -129,7 +129,7 @@ export const LoadedFlow = () => {
                 <TableHead className='w-[100px]'>Label</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Format</TableHead>
-                <TableHead>Default Value</TableHead>
+                <TableHead className='w-[100px]'>Default Value</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
